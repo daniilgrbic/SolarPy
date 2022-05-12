@@ -1,17 +1,4 @@
 import numpy as np
-import numpy.typing as npt
-
-
-def direction_vector(x, y=0, z=0):
-    if type(x) == list or type(x) == npt.NDArray:
-        return np.array(x + [0])
-    return np.array([x, y, z, 0])
-
-
-def position_vector(x, y=0, z=0):
-    if type(x) == list or type(x) == npt.NDArray:
-        return np.array(x + [1])
-    return np.array([x, y, z, 1])
 
 
 def normalize(v):
@@ -21,6 +8,30 @@ def normalize(v):
 def scale(factor):
     result = np.identity(4)
     result[0][0] = result[1][1] = result[2][2] = factor
+    return result
+
+
+def rotate(angle, axis):
+    a = angle
+    c = np.cos(a)
+    s = np.sin(a)
+
+    axis = normalize(axis)
+    temp = np.array((1. - c) * axis)
+
+    result = np.zeros(shape=(3, 3))
+    result[0][0] = c + temp[0] * axis[0]
+    result[0][1] = 0 + temp[0] * axis[1] + s * axis[2]
+    result[0][2] = 0 + temp[0] * axis[2] - s * axis[1]
+
+    result[1][0] = 0 + temp[1] * axis[0] - s * axis[2]
+    result[1][1] = c + temp[1] * axis[1]
+    result[1][2] = 0 + temp[1] * axis[2] + s * axis[0]
+
+    result[2][0] = 0 + temp[2] * axis[0] + s * axis[1]
+    result[2][1] = 0 + temp[2] * axis[1] - s * axis[0]
+    result[2][2] = c + temp[2] * axis[2]
+
     return result
 
 

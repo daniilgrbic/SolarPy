@@ -11,10 +11,11 @@ import time
 
 def mainloop():
     pygame.init()
-    width, height = 800, 800
+    width, height = 1000, 800
     window = pygame.display.set_mode((width, height))
     clock = pygame.time.Clock()
     pygame.display.set_caption("SolarPy")
+    paused = True
 
     renderer = Renderer()
 
@@ -26,9 +27,9 @@ def mainloop():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
-            if event.type == pygame.VIDEORESIZE:
-                # renderer.window_resize()
-                pass
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                paused = not paused
+            renderer.handle_events(event)
 
         """
         start_time = time.time()
@@ -36,14 +37,15 @@ def mainloop():
             system.update()
         print("--- %s seconds ---" % (time.time() - start_time))
         """
-        system.update()
+        if not paused:
+            system.update1()
 
         renderer.handle_input()
         rendered_system = renderer.render(system)
         window.blit(rendered_system, (0, 0))
 
         pygame.display.flip()
-        clock.tick(40)
+        clock.tick(30)
 
 
 if __name__ == '__main__':
