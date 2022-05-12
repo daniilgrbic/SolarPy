@@ -18,12 +18,18 @@ def normalize(v):
     return v / np.sqrt(np.sum(v[:3] ** 2))
 
 
+def scale(factor):
+    result = np.identity(4)
+    result[0][0] = result[1][1] = result[2][2] = factor
+    return result
+
+
 def look_at(eye, center, up):
     f = normalize(center - eye)
     u = normalize(up)
     s = normalize(np.cross(f, u))
     u = np.cross(s, f)
-    result = np.zeros(shape=(4, 4))
+    result = np.identity(4)
     result[0][0] = s[0]
     result[1][0] = s[1]
     result[2][0] = s[2]
@@ -50,18 +56,8 @@ def get_perspective(fov_y, aspect, z_near, z_far):
     return result
 
 
-def get_rotation_matrix(axis, theta):
-    """
-    Return the rotation matrix associated with counterclockwise rotation about
-    the given axis by theta radians.
-    """
-    axis = np.asarray(axis)
-    axis = axis / np.sqrt(np.dot(axis, axis))
-    a = np.cos(theta / 2.0)
-    b, c, d = -axis * np.sin(theta / 2.0)
-    aa, bb, cc, dd = a * a, b * b, c * c, d * d
-    bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
-    return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac), 0],
-                     [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab), 0],
-                     [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc, 0],
-                     [0, 0, 0, 1]])
+def perspective_divide(point):
+    return np.array([
+        point[0] / point[3],
+        -point[1] / point[3]
+    ])
