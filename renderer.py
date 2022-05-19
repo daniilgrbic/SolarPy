@@ -21,8 +21,10 @@ class Renderer:
         self.calc_matrices()
 
     def handle_events(self, event: pygame.event.Event):
-        if event.type == pygame.MOUSEWHEEL:
-            self.scale = max(min(1.0, self.scale + event.y / 10), 0.1)
+        if event.type == pygame.MOUSEWHEEL and not pygame.mouse.get_pressed()[2]:
+            self.scale = max(min(2.0, self.scale + event.y / 30), 0.05)
+            self.calc_matrices()
+        if event.type == pygame.WINDOWRESIZED:
             self.calc_matrices()
 
     def handle_input(self):
@@ -73,60 +75,62 @@ class Renderer:
             )
         )
 
-    def render(self, system: SolarSystem) -> pygame.Surface:
-        width, height = pygame.display.get_surface().get_size()
+    def render(self, system: SolarSystem, size=None) -> pygame.Surface:
+        width, height = size if size else pygame.display.get_surface().get_size()
         surface = pygame.Surface(size=(width, height))
         surface.fill(pygame.Color("black"))
 
         self.render_grid(surface)
 
-        # Draw the Sun
-        pygame.draw.circle(
-            surface=surface,
-            color=pygame.Color("yellow"),
-            center=(width // 2, height // 2),
-            radius=15)
-        surface.blit(
-            source=(rendered_text := self.font.render("Sun", True, pygame.Color("yellow"))),
-            dest=(width // 2 - rendered_text.get_width() // 2, height // 2 + 16)
-        )
-
         # Draw traces
-        for planet in system.planets:
+        for i, planet in enumerate(system.planets):
             pygame.draw.lines(
                 surface=surface,
                 color=pygame.Color("darkgray"),
                 closed=False,
                 points=[
                     (perspective_divide(np.matmul(pt, self.mvp)) + 1) * np.array([width // 2, height // 2])
-                    for pt in planet.trace
+                    for pt in [planet.trace[0]] + planet.trace[i * i + 1::i * i + 1] + [planet.trace[-1]]
                 ],
                 width=2
             )
 
+        # Draw the Sun
+        pygame.draw.circle(
+            surface=surface,
+            color=pygame.Color("yellow"),
+            center=(width // 2, height // 2),
+            radius=7 * self.scale + 3
+        )
+        surface.blit(
+            source=(rendered_text := self.font.render("Sun", True, pygame.Color("yellow"))),
+            dest=(width // 2 - rendered_text.get_width() // 2, height // 2 + 7 * self.scale + 3)
+        )
+
         # Draw planets
         for planet in system.planets:
-            position = (perspective_divide(np.matmul(planet.position, self.mvp)) + 1) \
-                       * np.array([width // 2, height // 2])
+            position = ((perspective_divide(np.matmul(planet.position, self.mvp)) + 1)
+                        * np.array([width // 2, height // 2]))
             pygame.draw.circle(
                 surface=surface,
                 color=pygame.Color("white"),
                 center=position,
-                radius=8)
+                radius=4 * self.scale + 3
+            )
             surface.blit(
                 source=(rendered_text := self.font.render(planet.name, True, pygame.Color("yellow"))),
-                dest=(
-                    position[0] - rendered_text.get_width() // 2, position[1] + 9)
+                dest=(position[0] - rendered_text.get_width() // 2, position[1] + 4 * self.scale + 3)
             )
 
         return surface
 
     def render_grid(self, surface: pygame.Surface):
         width, height = surface.get_size()
-        for i in range(-10, 11, 1):
-            start = ((perspective_divide(np.matmul(np.array([-10, i, 0, 1]), self.mvp)) + 1)
+        grid_size = min(int(4 / self.scale) + 2, 50)
+        for i in range(-grid_size, grid_size + 1, 1):
+            start = ((perspective_divide(np.matmul(np.array([-grid_size, i, 0, 1]), self.mvp)) + 1)
                      * np.array([width // 2, height // 2]))
-            end = ((perspective_divide(np.matmul(np.array([10, i, 0, 1]), self.mvp)) + 1)
+            end = ((perspective_divide(np.matmul(np.array([grid_size, i, 0, 1]), self.mvp)) + 1)
                    * np.array([width // 2, height // 2]))
             pygame.draw.line(
                 surface=surface,
@@ -134,9 +138,9 @@ class Renderer:
                 start_pos=start,
                 end_pos=end
             )
-            start = ((perspective_divide(np.matmul(np.array([i, -10, 0, 1]), self.mvp)) + 1)
+            start = ((perspective_divide(np.matmul(np.array([i, -grid_size, 0, 1]), self.mvp)) + 1)
                      * np.array([width // 2, height // 2]))
-            end = ((perspective_divide(np.matmul(np.array([i, 10, 0, 1]), self.mvp)) + 1)
+            end = ((perspective_divide(np.matmul(np.array([i, grid_size, 0, 1]), self.mvp)) + 1)
                    * np.array([width // 2, height // 2]))
             pygame.draw.line(
                 surface=surface,

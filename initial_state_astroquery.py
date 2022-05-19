@@ -1,6 +1,5 @@
 from astropy.time import Time
 from astroquery.jplhorizons import Horizons
-import json
 
 
 def retrieve_data(start_date: str):
@@ -16,8 +15,9 @@ def retrieve_data(start_date: str):
             "position": [planet[ci].value[0] for ci in ['x', 'y', 'z']],
             "velocity": [planet[vi].value[0] for vi in ['vx', 'vy', 'vz']]
         })
-
-    with open("data/{}.json".format(start_date), "w") as f:
+    import os
+    os.makedirs(os.path.dirname(f"data/{start_date}.json"), exist_ok=True)
+    with open(f"data/{start_date}.json", "w") as f:
         import json
         json.dump({
             "date": start_date,
@@ -26,11 +26,12 @@ def retrieve_data(start_date: str):
 
 
 def load_data(start_date: str) -> list[dict]:
-    from os.path import exists
-    if not exists("data/{}.json".format(start_date)):
+    import os
+    if not os.path.exists(f"data/{start_date}.json"):
         retrieve_data(start_date)
 
-    with open("data/{}.json".format(start_date), "r") as f:
+    with open(f"data/{start_date}.json", "r") as f:
+        import json
         data = json.load(f)
         planets = data["planets"]
 

@@ -1,0 +1,9 @@
+Usage: python main.py [options]
+Options:
+  --help               Display this information
+  --start_date=<date>  Start simulation form date specified in YYYY-MM-DD format
+                       (use current date by default)
+  --horizons           Use Horizons to retrieve initial state
+Controls:
+  Drag with mouse to change the view; use scroll wheel to change zoom;
+  right-click and scroll to change the speed of simulation
