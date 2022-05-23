@@ -1,6 +1,7 @@
 import constants
 import numpy as np
 import numpy.typing as npt
+import datetime
 
 
 class Astrobject:
@@ -18,7 +19,7 @@ class Astrobject:
             if ao.name == self.name or ao.name == 'sun':
                 continue
             dx = ao.position[0:3] - self.position[0:3]
-            dsq = dx[0] ** 2 + dx[1] ** 2 + dx[2] ** 2
+            dsq = np.sum(np.square(dx[0:3]))
             dr = np.sqrt(dsq)
             force = constants.GRAV_CONSTANT * ao.mass / dsq
             a = a + dx[0:3] * (force / dr)
@@ -84,9 +85,8 @@ class SolarSystem:
             self.planets[i].mass = constants.planets_mass[i] * (10 ** 24)
             self.planets[i].max_trace_len = planet_trace[i]
 
-        y, m, d = [int(i) for i in start_date.split("-")]
-        self.day = (367 * y - 7 * (y + (m + 9) // 12) // 4
-                    - 3 * ((y + (m - 9) // 7) // 100 + 1) // 4 + 275 * m // 9 + d + 1721029)  # Julian Ephemeris Date
+        year, month, day = [int(i) for i in start_date.split("-")]
+        self.date = datetime.datetime(year, month, day)
 
     def update_rk(self):
         """ Update planet positions using Runge Kutta method """
@@ -94,41 +94,10 @@ class SolarSystem:
         for planet in self.planets:
             planet.update_planet(self.planets, self.sun, dt)
             planet.update_trace()
-        self.day += dt
+        self.date += datetime.timedelta(days=1)
 
-    def get_date(self) -> str:
-        """ Determine current simulation date in YYYY-MM-DD format """
-        int_gr = int(self.day)
-        frac = self.day - int_gr
-        greg_jd = 2299161
-        if int_gr >= greg_jd:  # Gregorian calendar correction
-            tmp = int(((int_gr - 1867216) - 0.25) / 36524.25)
-            j1 = int_gr + 1 + tmp - int(0.25 * tmp)
-        else:
-            j1 = int_gr
-
-        # correction for half day offset
-        day_frac = frac + 0.5
-        if day_frac >= 1.0:
-            day_frac -= 1.0
-            j1 += 1
-
-        j2 = j1 + 1524
-        j3 = int(6680.0 + ((j2 - 2439870) - 122.1) / 365.25)
-        j4 = int(j3 * 365.25)
-        j5 = int((j2 - j4) / 30.6001)
-
-        d = int(j2 - j4 - int(j5 * 30.6001))
-        m = int(j5 - 1)
-        if m > 12:
-            m -= 12
-        y = int(j3 - 4715)
-        if m > 2:
-            y -= 1
-        if y <= 0:
-            y -= 1
-
-        return f"{y:04d}-{m:02d}-{d:02d}"
+    def get_date(self):
+        return self.date.strftime("%Y-%m-%d")
 
     def dump_state(self):
         current_date = self.get_date()

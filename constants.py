@@ -8,8 +8,8 @@ AU = 149597871  # Astronomical unit in kilometers
 planets_names = ["Mercury", "Venus", "Earth-Moon", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"]
 
 """ Planet and Sun masses """
-sun_mass = 1.989e30
-planets_mass = [0.33, 4.87, 6.043, 0.642, 1898.0, 568.0, 86.8, 102.0, 0.013]
+sun_mass = 1.9885e30
+planets_mass = [0.33010, 4.8673, 6.04566, 0.64169, 1898.13, 568.32, 86.811, 102.409, 0.01303]
 
 """ Keplerian elements and their rates, valid for the time-interval 1800 AD - 2050 AD """
 keplerian_elements_1800_2050 = [

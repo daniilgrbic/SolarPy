@@ -38,9 +38,11 @@ def main():
     renderer = Renderer()
 
     paused = True
-    frame = 0
-    simulation_speed = 30
-    max_fps = 90
+    frame_counter = 0
+    simulation_speed = 30  # in days per second
+    curr_fps = 30
+    min_fps = 30
+    max_fps = 60
 
     while True:
         for event in pygame.event.get():
@@ -54,7 +56,7 @@ def main():
                 print(f"Dumped state for {system.get_date()}")
             if event.type == pygame.MOUSEWHEEL and pygame.mouse.get_pressed()[2]:
                 if event.y > 0:
-                    simulation_speed = min(simulation_speed + 1, max_fps)
+                    simulation_speed = min(simulation_speed + 1, 120)
                 else:
                     simulation_speed = max(simulation_speed - 1, 1)
             renderer.handle_events(event)
@@ -62,17 +64,28 @@ def main():
         renderer.handle_input()
 
         if not paused:
-            if frame >= max_fps / simulation_speed:
-                system.update_rk()
-                frame = 0
+            if simulation_speed >= min_fps:
+                _update_days = simulation_speed // max_fps + int(simulation_speed % max_fps != 0)
+                curr_fps = simulation_speed // _update_days
+                frame_counter = 0
+                for _ in range(_update_days):
+                    system.update_rk()
+                # print(_update_days, curr_fps, simulation_speed)
+            else:
+                _skip_days = max_fps // simulation_speed
+                curr_fps = simulation_speed * _skip_days
+                frame_counter += 1
+                if frame_counter >= _skip_days:
+                    frame_counter = 0
+                    system.update_rk()
+                # print(_skip_days, curr_fps, simulation_speed)
 
         rendered_system = renderer.render(system)
         window.blit(rendered_system, (0, 0))
         pygame.display.flip()
         pygame.display.set_caption(f"SolarPy | {system.get_date()} | Speed: {simulation_speed} days/s")
 
-        clock.tick(max_fps)
-        frame += 1
+        clock.tick(curr_fps)
 
 
 if __name__ == '__main__':
