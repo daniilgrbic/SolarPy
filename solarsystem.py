@@ -80,24 +80,25 @@ class SolarSystem:
                 position=np.array(planet["position"] + [1]),
                 velocity=np.array(planet["velocity"] + [0])
             ))
-        planet_trace = [57, 108, 150, 228, 780, 1430, 2877, 4510, 5830]
+        planet_trace = [88, 225, 366, 688, 11.9*366, 29.5*366, 84*366, 164.8*366, 247.7*366]
         for i in range(9):
             self.planets[i].mass = constants.planets_mass[i] * (10 ** 24)
-            self.planets[i].max_trace_len = planet_trace[i]
+            self.planets[i].max_trace_len = planet_trace[i] // max(1, i - 2)
 
         year, month, day = [int(i) for i in start_date.split("-")]
+        self.start_date = datetime.datetime(year, month, day)
         self.date = datetime.datetime(year, month, day)
 
-    def update_rk(self):
+    def update_rk(self, dt=24):
         """ Update planet positions using Runge Kutta method """
-        dt = 1
-        for planet in self.planets:
-            planet.update_planet(self.planets, self.sun, dt)
-            planet.update_trace()
-        self.date += datetime.timedelta(days=1)
+        for i, planet in enumerate(self.planets):
+            planet.update_planet(self.planets, self.sun, dt/24)
+            if (self.date - self.start_date).days % max(1, i - 2) == 0 and (self.date - self.start_date).seconds == 0:
+                planet.update_trace()
+        self.date += datetime.timedelta(hours=dt)
 
     def get_date(self):
-        return self.date.strftime("%Y-%m-%d")
+        return self.date.strftime("%Y-%m-%d (%Hh)")
 
     def dump_state(self):
         current_date = self.get_date()

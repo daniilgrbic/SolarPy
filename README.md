@@ -29,6 +29,10 @@ The program can be run with additional command line arguments:
     ```
     python main.py --start=1500-01-01
     ```
+* `--dt=<delta>` Set the dt used in simulation in hours (default is 24h)
+    ```
+    python main.py  --start=2000-01-01 --dt=8
+    ```
 * `--horizons` Use JPL Horizons Queries to calculate initial state (can be combined with `--start`).
     ```
     python main.py --horizons

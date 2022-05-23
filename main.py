@@ -5,6 +5,7 @@ import time
 def main():
     start_date = None
     use_horizons = False
+    dt = 24  # in hours
 
     for i in sys.argv:
         arg, *val = i.split("=")
@@ -14,6 +15,8 @@ def main():
             exit(1)
         if arg == "--start":
             start_date = val[0]
+        if arg == "--dt":
+            dt = int(val[0])
         if arg == "--horizons":
             use_horizons = True
 
@@ -39,10 +42,10 @@ def main():
 
     paused = True
     frame_counter = 0
-    simulation_speed = 30  # in days per second
+    simulation_speed = 120  # in days per second
     curr_fps = 30
     min_fps = 30
-    max_fps = 60
+    max_fps = 40
 
     while True:
         for event in pygame.event.get():
@@ -56,7 +59,7 @@ def main():
                 print(f"Dumped state for {system.get_date()}")
             if event.type == pygame.MOUSEWHEEL and pygame.mouse.get_pressed()[2]:
                 if event.y > 0:
-                    simulation_speed = min(simulation_speed + 1, 120)
+                    simulation_speed = min(simulation_speed + 1, 365)
                 else:
                     simulation_speed = max(simulation_speed - 1, 1)
             renderer.handle_events(event)
@@ -69,7 +72,7 @@ def main():
                 curr_fps = simulation_speed // _update_days
                 frame_counter = 0
                 for _ in range(_update_days):
-                    system.update_rk()
+                    system.update_rk(dt=dt)
                 # print(_update_days, curr_fps, simulation_speed)
             else:
                 _skip_days = max_fps // simulation_speed
@@ -77,15 +80,17 @@ def main():
                 frame_counter += 1
                 if frame_counter >= _skip_days:
                     frame_counter = 0
-                    system.update_rk()
+                    system.update_rk(dt=dt)
                 # print(_skip_days, curr_fps, simulation_speed)
 
         rendered_system = renderer.render(system)
         window.blit(rendered_system, (0, 0))
         pygame.display.flip()
-        pygame.display.set_caption(f"SolarPy | {system.get_date()} | Speed: {simulation_speed} days/s")
 
         clock.tick(curr_fps)
+        pygame.display.set_caption(f"SolarPy | {system.get_date()} | Speed: {simulation_speed*dt/24:.2f} days/s" +
+                                   (" (!)" if clock.get_fps() < curr_fps * 0.8 else "") +
+                                   (" | PAUSED" if paused else ""))
 
 
 if __name__ == '__main__':
