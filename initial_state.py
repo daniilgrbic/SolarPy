@@ -59,12 +59,10 @@ def load_data(start_date: str) -> list[dict]:
     for i in range(9):
         w = planets_elements[i].w1 - planets_elements[i].N
         M = planets_elements[i].L - planets_elements[i].w1
-        if i == 0:
-            M = 168.6562 + 4.0923344368 * T * 36525
-        M %= 360
         if i in range(4, 9):
             M += (constants.b[i - 4] * (T ** 2) + constants.c[i - 4] * math.cos(constants.f[i - 4] * T)
                   + constants.s[i - 4] * math.sin(constants.f[i - 4] * T))
+        M %= 360
 
         e = planets_elements[i].e
         e1 = e * Angle.DEG_FROM_RAD
