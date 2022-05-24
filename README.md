@@ -52,7 +52,7 @@ The program can be run with additional command line arguments:
   E. Standish, James G. Williams
 * [Keplerian Orbit Elements → Cartesian State Vectors.](https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf)
   René Schwarz
-* [THE EQUATIONS OF PLANETARY MOTION AND THEIR NUMERICAL SOLUTION.](http://www.wiu.edu/cas/mathematics_and_philosophy/graduate/equations-planetary-motion.pdf#section.5)
+* [THE EQUATIONS OF PLANETARY MOTION AND THEIR NUMERICAL SOLUTION.](http://www.wiu.edu/cas/mathematics_and_philosophy/graduate/equations-planetary-motion.pdf)
   Jonathan Njeunje, Dinuka Sewwandi de Silva
 * [opengl-tutorial (www.opengl-tutorial.org)](http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/)
 * [Perspective Projection - Graphics Programming.](https://www.mathematik.uni-marburg.de/~thormae/lectures/graphics1/graphics_6_1_eng_web.html#1)
